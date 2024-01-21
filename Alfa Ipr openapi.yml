@@ -1,0 +1,560 @@
+openapi: 3.0.0
+info:
+  title: Микросервис Индивидуальных планов развития сотрудников Альфа банка
+  description: |-
+    Сервис, в рамках которого для сотрудников можно будет составить ИПР (индивидуальные планы развития), просматривать его и валидировать выполнение целей.
+  version: 0.0.1
+servers:
+  - url: https://localhost:8000/api/v1
+
+
+components:
+  securitySchemes:
+    OAuth2PasswordBearer:
+      type: oauth2
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: /auth/
+
+  schemas:
+    get_access_token:
+      required: 
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    Token:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int
+          example: 1
+        username:
+          type: string
+          example: User01
+        firstname:
+          type: string
+          example: Иван
+        lastname:
+          type: string
+          example: Иванов
+        patronymic:
+          type: string
+          description: Отчество
+          example: Иванович
+        email:
+          type: string
+          example: john@email.com
+        position:
+          type: string
+          description: Должность
+          example: Junior product manager
+        superior:
+          type: array
+          items:
+            $ref: "#/components/schemas/Colleague"
+          description: Руководители  
+        subordinates:
+          type: array
+          items:
+            $ref: "#/components/schemas/Colleague"
+          description: Подчиненные
+
+
+    Colleague:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Петров Иван Иванович
+
+    Ipr:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 10
+        title:
+          type: string
+          example: Качаем Soft skills
+        employee:
+          type: string
+          example: Иванов Иван Иванович
+        author:
+          type: string
+          example: Иванов Иван Иванович
+        description: 
+          type: string
+          example: Вот список всех книг, которые ты должен прочесть до пятницы...
+        status:
+          type: string
+          enum:
+            - Not started
+            - In progress
+            - Done
+            - Canceled
+        created_date:
+          type: string
+          format: 2024-01-18T22:00:00+01
+        end_date:
+          type: string
+          format: 2024-01-18T22:00:00+01
+    Iprs:
+      type: array
+      items:
+        $ref: "#/components/schemas/Ipr"
+    CreateIpr:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Качаем Soft skills
+        employee:
+          type: integer
+          example: 10
+        description: 
+          type: string
+          example: Вот список всех книг, которые ты должен прочесть до пятницы...
+        status:
+          type: string
+          enum:
+            - Not started
+            - In progress
+            - Done
+            - Canceled
+        end_date:
+          type: string
+          format: 2024-01-18T22:00:00+01
+    UpdateIpr:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Качаем Soft skills
+        description: 
+          type: string
+          example: Вот список всех книг, которые ты должен прочесть до пятницы...
+        status:
+          type: string
+          enum:
+            - Not started
+            - In progress
+            - Done
+            - Canceled
+        end_date:
+          type: string
+          format: 2024-01-18T22:00:00+01
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 10
+        title:
+          type: string
+          example: Пройти курс
+        description: 
+          type: string
+          example: Курс направлен на изучение фреймворка ...
+        status:
+          type: string
+          enum:
+            - Not started
+            - In progress
+            - Done
+            - Canceled
+        ipr:
+          type: string
+          example: ИПР1_2024 Дизайн интерфейсов
+        comments: # в списке тасков, наверное, комментарии можно не передавать?
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+        created_date:
+          type: string
+          format: 2024-01-18T22:00:00+01
+        end_date:
+          type: string
+          format: 2024-01-18T22:00:00+01
+    Tasks:
+      type: array
+      items:
+        $ref: "#/components/schemas/Task"
+    CreateTask:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Пройти курс
+        ipr:
+          type: integer
+          example: 3
+        description: 
+          type: string
+          example: Курс направлен на изучение фреймворка ...
+        status:
+          type: string
+          enum:
+            - Not started
+            - In progress
+            - Done
+            - Canceled
+        end_date:
+          type: string
+          format: 2024-01-18T22:00:00+01
+    UpdateTask:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Пройти курс
+        description: 
+          type: string
+          example: Курс направлен на изучение фреймворка ...
+        status:
+          type: string
+          enum:
+            - Not started
+            - In progress
+            - Done
+            - Canceled
+        end_date:
+          type: string
+          format: 2024-01-18T22:00:00+01
+    Comment: 
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 10
+        created_date:
+          type: string
+          format: 2024-01-18T22:00:00+01
+        author:
+          type: integer
+          example: 1
+        task:
+          type: integer
+          example: 3
+        text:
+          type: string
+          example: Короче, так брифы проводить больше нельзя, Василий.
+    CreateComment: 
+      type: object
+      properties:
+        author:
+          type: integer
+          example: 1
+        task:
+          type: integer
+          example: 3
+        text:
+          type: string
+          example: Короче, так брифы проводить больше нельзя, Василий.
+        
+          
+paths:
+  /auth/:
+    post:
+      summary: Get Access Token
+      requestBody:
+        content: 
+          application/x-www-form-urlencoded:
+            schema:
+              "$ref": "#/components/schemas/get_access_token"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Token"
+  /users/:
+    get:
+      tags:
+        - user
+      summary: Get a list of all users
+      description: This can only be done by the logged in user.
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'          
+        '400':
+          description: Invalid value
+  /users/logout/:
+    get:
+      tags:
+        - user
+      summary: Logs out current logged in user session
+      description: ''
+      parameters: []
+      responses:
+        default:
+          description: successful operation
+  /users/{id}/:
+    get:
+      tags:
+        - user
+      summary: Get user by 'id'
+      description: ''
+      parameters:
+        - name: id
+          in: path
+          description: 'The id that needs to be fetched. Use 01 for testing. '
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'          
+        '400':
+          description: Invalid id supplied
+        '404':
+          description: User not found
+  /iprs/:
+    get:
+      summary: Метод получения всех ипр подчиненных(?) сотрудников
+      tags:
+        - Iprs
+      operationId: getAllIprs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Iprs"
+    post:
+      summary: Метод создания ипр сотрудника
+      tags:
+        - Iprs
+      operationId: createIpr
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateIpr"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ipr"
+  /iprs/{id}/:
+    get:
+      summary: Метод получения ипр по идентификатору
+      tags:
+        - Iprs
+      operationId: getAllIprById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: идентификатор ипр
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ipr"
+    patch:
+      summary: Метод частичного изменения ипр по идентификатору
+      tags:
+        - Iprs
+      operationId: patchIprById
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateIpr"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: идентификатор ипр
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ipr"
+    delete:
+      summary: Метод удаления ипр по идентификатору
+      tags:
+        - Iprs
+      operationId: deleteIprById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: индентификатор ипр
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json: {}
+  /tasks/:
+    get:
+      summary: Метод получения всех задач
+      tags:
+        - Tasks
+      operationId: getAllTasks
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tasks"
+    post:
+      summary: Метод создания задачи
+      tags:
+        - Tasks
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTask"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+  /tasks/{id}/:
+    get:
+      summary: Метод получения задачи по идентификатору
+      tags:
+        - Iprs
+      operationId: getAllTasksById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: идентификатор задачи
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    put:
+      summary: Метод изменения задачи по идентификатору
+      tags:
+        - Tasks
+      operationId: putTaskById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: идентификатор ипр
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    patch:
+      summary: Метод частичного изменения задачи по идентификатору
+      tags:
+        - Tasks
+      operationId: patchTaskById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: идентификатор ипр
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateTask"
+    delete:
+      summary: Метод удаления задачи по идентификатору
+      tags:
+        - Iprs
+      operationId: deleteIprById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: индентификатор задачи
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json: {}
+  /comments/:
+    post:
+      summary: Метод создания комментария к задачи ИПР
+      tags:
+        - Comments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateComment'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        '400':
+          description: Ошибка запроса
+        '403':
+          description: Нет прав доступа
