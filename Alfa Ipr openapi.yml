@@ -336,6 +336,19 @@ paths:
           description: Invalid id supplied
         '404':
           description: User not found
+  /users/me/:
+    get:
+      tags:
+        - user
+      summary: Get auth user info
+      description: ''
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'          
   /iprs/:
     get:
       summary: Метод получения всех ипр подчиненных(?) сотрудников
