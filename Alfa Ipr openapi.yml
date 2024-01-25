@@ -105,6 +105,8 @@ components:
         status:
           type: string
           enum:
+            - Failed
+            - No status
             - Not started
             - In progress
             - Done
@@ -134,6 +136,8 @@ components:
         status:
           type: string
           enum:
+            - Failed
+            - No status
             - Not started
             - In progress
             - Done
@@ -153,6 +157,8 @@ components:
         status:
           type: string
           enum:
+            - Failed
+            - No status
             - Not started
             - In progress
             - Done
@@ -175,6 +181,8 @@ components:
         status:
           type: string
           enum:
+            - Failed
+            - No status
             - Not started
             - In progress
             - Done
@@ -211,6 +219,8 @@ components:
         status:
           type: string
           enum:
+            - Failed
+            - No status
             - Not started
             - In progress
             - Done
@@ -230,6 +240,8 @@ components:
         status:
           type: string
           enum:
+            - Failed
+            - No status
             - Not started
             - In progress
             - Done
@@ -301,17 +313,24 @@ paths:
                 items:
                   $ref: '#/components/schemas/User'          
         '400':
-          description: Invalid value
-  /users/logout/:
+          description: Invalid 
+  /users/get_subordinates/:
     get:
       tags:
         - user
-      summary: Logs out current logged in user session
-      description: ''
-      parameters: []
+      summary: Get a list of all subordinatites users of logged user
+      description: This can only be done by the logged in user.
       responses:
-        default:
+        '200':
           description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'          
+        '400':
+          description: Invalid value
   /users/{id}/:
     get:
       tags:
@@ -349,12 +368,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'          
-  /iprs/:
+  /iprs/my/:
     get:
-      summary: Метод получения всех ипр подчиненных(?) сотрудников
+      summary: Метод получения всех ипр залогиненного пользователя
       tags:
         - Iprs
-      operationId: getAllIprs
+      operationId: getMyIprs
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+            - Failed
+            - No status
+            - Not started
+            - In progress
+            - Done
+            - Canceled
+        - name: employee
+          in: query
+          required: false
+          schema:
+            type: integer # id
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Iprs"
+  /iprs/subordinates/:
+    get:
+      summary: Метод получения всех ипр подчиненных сотрудников
+      tags:
+        - Iprs
+      operationId: getSubordinatesIprs
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+            - Failed
+            - No status
+            - Not started
+            - In progress
+            - Done
+            - Canceled
+        - name: employee
+          in: query
+          required: false
+          schema:
+            type: integer # id
       responses:
         '200':
           description: OK
@@ -442,12 +521,37 @@ paths:
           description: OK
           content:
             application/json: {}
-  /tasks/:
+  /iprs/{id}/tasks/:
     get:
-      summary: Метод получения всех задач
+      summary: Метод получения задач конкретного ипр
       tags:
         - Tasks
-      operationId: getAllTasks
+      parameters:
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: end
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+            - Failed
+            - No status
+            - Not started
+            - In progress
+            - Done
+            - Canceled
+
       responses:
         '200':
           description: OK
@@ -455,6 +559,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Tasks"
+  /tasks/:
     post:
       summary: Метод создания задачи
       tags:
@@ -548,6 +653,20 @@ paths:
           description: OK
           content:
             application/json: {}
+  /task/{id}/comments/:
+    get:
+      summary: Метод получения комментариев к задачи
+      tags:
+        - Comments
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
   /comments/:
     post:
       summary: Метод создания комментария к задачи ИПР
