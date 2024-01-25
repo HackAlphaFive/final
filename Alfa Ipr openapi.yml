@@ -527,6 +527,12 @@ paths:
       tags:
         - Tasks
       parameters:
+        - name: id
+          in: path
+          required: true
+          description: идентификатор ипр
+          schema:
+            type: integer
         - name: start
           in: query
           required: false
@@ -658,6 +664,13 @@ paths:
       summary: Метод получения комментариев к задачи
       tags:
         - Comments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: индентификатор задачи
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
