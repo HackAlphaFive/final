@@ -126,9 +126,14 @@ components:
           type: string
           format: date
     Iprs:
-      type: array
-      items:
-        $ref: "#/components/schemas/Ipr"
+      type: object
+      properties:
+        pages:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Ipr"
     CreateIpr:
       type: object
       properties:
@@ -600,7 +605,6 @@ paths:
             - In progress
             - Done
             - Canceled
-
       responses:
         '200':
           description: OK
