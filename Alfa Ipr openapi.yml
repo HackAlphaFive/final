@@ -94,8 +94,14 @@ components:
           type: string
           example: Качаем Soft skills
         employee:
-          type: string
-          example: Иванов Иван Иванович
+          type: object
+          properties:
+            fullName:
+              type: string
+              example: Иванов Иван Иванович
+            position:
+              type: string
+              example: Ведущий специалист по тестированию
         author:
           type: string
           example: Иванов Иван Иванович
@@ -107,16 +113,18 @@ components:
           enum:
             - Failed
             - No status
-            - Not started
             - In progress
             - Done
             - Canceled
         created_date:
           type: string
-          format: 2024-01-18T22:00:00+01
+          format: date-time
+        start_date:
+          type: string
+          format: date
         end_date:
           type: string
-          format: 2024-01-18T22:00:00+01
+          format: date
     Iprs:
       type: array
       items:
@@ -133,18 +141,6 @@ components:
         description: 
           type: string
           example: Вот список всех книг, которые ты должен прочесть до пятницы...
-        status:
-          type: string
-          enum:
-            - Failed
-            - No status
-            - Not started
-            - In progress
-            - Done
-            - Canceled
-        end_date:
-          type: string
-          format: 2024-01-18T22:00:00+01
     UpdateIpr:
       type: object
       properties:
@@ -159,13 +155,15 @@ components:
           enum:
             - Failed
             - No status
-            - Not started
             - In progress
             - Done
             - Canceled
+        start_date:
+          type: string
+          format: date
         end_date:
           type: string
-          format: 2024-01-18T22:00:00+01
+          format: date
     Task:
       type: object
       properties:
@@ -183,27 +181,61 @@ components:
           enum:
             - Failed
             - No status
-            - Not started
             - In progress
             - Done
             - Canceled
         ipr:
           type: string
           example: ИПР1_2024 Дизайн интерфейсов
-        comments: # в списке тасков, наверное, комментарии можно не передавать?
+        comments:
           type: array
           items:
             $ref: "#/components/schemas/Comment"
         created_date:
           type: string
-          format: 2024-01-18T22:00:00+01
+          format: date-time
+        start_date:
+          type: string
+          format: date
         end_date:
           type: string
-          format: 2024-01-18T22:00:00+01
+          format: date
+    TaskSimplified:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 10
+        title:
+          type: string
+          example: Пройти курс
+        description: 
+          type: string
+          example: Курс направлен на изучение фреймворка ...
+        status:
+          type: string
+          enum:
+            - Failed
+            - No status
+            - In progress
+            - Done
+            - Canceled
+        ipr:
+          type: string
+          example: ИПР1_2024 Дизайн интерфейсов
+        created_date:
+          type: string
+          format: date-time # 2023-01-26T15:18:43.511Z
+        start_date:
+          type: string
+          format: date # 2023-01-26
+        end_date:
+          type: string
+          format: date
     Tasks:
       type: array
       items:
-        $ref: "#/components/schemas/Task"
+        $ref: "#/components/schemas/TaskSimplified"
     CreateTask:
       type: object
       properties:
@@ -216,18 +248,12 @@ components:
         description: 
           type: string
           example: Курс направлен на изучение фреймворка ...
-        status:
+        start_date:
           type: string
-          enum:
-            - Failed
-            - No status
-            - Not started
-            - In progress
-            - Done
-            - Canceled
+          format: date
         end_date:
           type: string
-          format: 2024-01-18T22:00:00+01
+          format: date
     UpdateTask:
       type: object
       properties:
@@ -242,13 +268,15 @@ components:
           enum:
             - Failed
             - No status
-            - Not started
             - In progress
             - Done
             - Canceled
+        start_date:
+          type: string
+          format: date
         end_date:
           type: string
-          format: 2024-01-18T22:00:00+01
+          format: date
     Comment: 
       type: object
       properties:
@@ -257,7 +285,7 @@ components:
           example: 10
         created_date:
           type: string
-          format: 2024-01-18T22:00:00+01
+          format: date-time
         author:
           type: integer
           example: 1
@@ -388,16 +416,21 @@ paths:
             enum:
             - Failed
             - No status
-            - Not started
             - In progress
             - Done
             - Canceled
-        - name: employee
+        - name: start
           in: query
           required: false
           schema:
-            type: integer # id
-
+            type: string
+            format: date
+        - name: end
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
       responses:
         '200':
           description: OK
@@ -407,7 +440,7 @@ paths:
                 $ref: "#/components/schemas/Iprs"
   /iprs/subordinates/:
     get:
-      summary: Метод получения всех ипр подчиненных сотрудников
+      summary: Метод получения ипр подчиненных сотрудников
       tags:
         - Iprs
       operationId: getSubordinatesIprs
@@ -425,7 +458,6 @@ paths:
             enum:
             - Failed
             - No status
-            - Not started
             - In progress
             - Done
             - Canceled
@@ -434,6 +466,18 @@ paths:
           required: false
           schema:
             type: integer # id
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date 
+        - name: end
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
       responses:
         '200':
           description: OK
@@ -553,7 +597,6 @@ paths:
             enum:
             - Failed
             - No status
-            - Not started
             - In progress
             - Done
             - Canceled
@@ -604,30 +647,17 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Task"
-    put:
-      summary: Метод изменения задачи по идентификатору
-      tags:
-        - Tasks
-      operationId: putTaskById
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: идентификатор ипр
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Task"
     patch:
       summary: Метод частичного изменения задачи по идентификатору
       tags:
         - Tasks
       operationId: patchTaskById
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTask"
       parameters:
         - name: id
           in: path
@@ -646,7 +676,7 @@ paths:
       summary: Метод удаления задачи по идентификатору
       tags:
         - Iprs
-      operationId: deleteIprById
+      operationId: deleteTaskById
       parameters:
         - name: id
           in: path
